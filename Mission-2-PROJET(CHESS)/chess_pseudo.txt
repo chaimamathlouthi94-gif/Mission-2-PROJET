@@ -1,0 +1,139 @@
+ALGORITHME Jeu d'échecs
+
+VARIABLES
+    plateau : Tableau 8x8 de Caractère
+    joueur_actuel : Chaîne ("blanc" ou "noir")
+    partie_terminee : Booléen
+    score_blanc, score_noir : Entier
+    historique_coups : Liste de Chaîne
+
+DÉBUT
+    // Initialisation
+    plateau ← INITIALISER_PLATEAU()
+    joueur_actuel ← "blanc"
+    partie_terminee ← FAUX
+    score_blanc ← 0
+    score_noir ← 0
+    historique_coups ← Liste Vide
+
+    // Boucle principale du jeu
+    TANT QUE NON partie_terminee FAIRE
+        
+        // Affichage
+        AFFICHER_PLATEAU(plateau)
+        AFFICHER "Tour du joueur : ", joueur_actuel
+        AFFICHER "Score - Blanc: ", score_blanc, " | Noir: ", score_noir
+        
+        // Saisie utilisateur
+        SAISIR commande
+        
+        // Traitement des commandes spéciales
+        SI commande = "quitter" ALORS
+            partie_terminee ← VRAI
+            CONTINUER
+        FIN SI
+        
+        SI commande = "score" ALORS
+            AFFICHER_SCORES()
+            CONTINUER
+        FIN SI
+        
+        SI commande COMMENCE_PAR "coups " ALORS
+            position ← EXTRAIRE_POSITION(commande)
+            coups_legaux ← GENERER_COUPS_LEGAUX(plateau, position, joueur_actuel)
+            AFFICHER "Coups légaux: ", coups_legaux
+            CONTINUER
+        FIN SI
+        
+        // Traitement d'un coup normal
+        SI CONTIENT_ESPACE(commande) ALORS
+            position_depart, position_arrivee ← DECOUPER_COUP(commande)
+            
+            // Validation du coup
+            coups_legaux ← GENERER_COUPS_LEGAUX(plateau, position_depart, joueur_actuel)
+            
+            SI position_arrivee DANS coups_legaux ALORS
+                
+                // Exécution du coup
+                EXECUTER_COUP(plateau, position_depart, position_arrivee)
+                
+                // Mise à jour du score si prise
+                SI COUP_PRISE(plateau, position_arrivee) ALORS
+                    piece_prise ← IDENTIFIER_PIECE_PRISE(plateau, position_arrivee)
+                    valeur ← CALCULER_VALEUR(piece_prise)
+                    SI joueur_actuel = "blanc" ALORS
+                        score_blanc ← score_blanc + valeur
+                    SINON
+                        score_noir ← score_noir + valeur
+                    FIN SI
+                FIN SI
+                
+                // Sauvegarde dans l'historique
+                AJOUTER historique_coups, (position_depart + "→" + position_arrivee)
+                
+                // Changement de joueur
+                joueur_actuel ← CHANGER_JOUEUR(joueur_actuel)
+                
+                AFFICHER "Coup exécuté avec succès!"
+                
+            SINON
+                AFFICHER "Coup illégal! Coups possibles: ", coups_legaux
+            FIN SI
+            
+        SINON
+            AFFICHER "Format invalide. Utilisez: 'position_départ position_arrivée'"
+        FIN SI
+        
+    FIN TANT QUE
+    
+    AFFICHER "Partie terminée. Merci d'avoir joué!"
+FIN ALGORITHME
+
+FONCTION INITIALISER_PLATEAU() RETOURNE Tableau
+    plateau ← Nouveau Tableau 8x8
+    // Placement des pièces noires (lignes 0 et 1)
+    plateau[0] ← ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
+    plateau[1] ← ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p']
+    
+    // Placement des pièces blanches (lignes 6 et 7)
+    plateau[6] ← ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P']
+    plateau[7] ← ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+    
+    // Cases vides
+    POUR i DE 2 À 5 FAIRE
+        POUR j DE 0 À 7 FAIRE
+            plateau[i][j] ← ' '
+        FIN POUR
+    FIN POUR
+    
+    RETOURNER plateau
+FIN FONCTION
+
+FONCTION GENERER_COUPS_LEGAUX(plateau, position, joueur) RETOURNE Liste
+    (ligne, colonne) ← CONVERTIR_NOTATION(position)
+    piece ← plateau[ligne][colonne]
+    
+    SI piece = ' ' ALORS
+        RETOURNER Liste Vide
+    FIN SI
+    
+    // Vérification propriétaire de la pièce
+    SI (joueur = "blanc" ET piece EST_MINUSCULE) OU
+       (joueur = "noir" ET piece EST_MAJUSCULE) ALORS
+        RETOURNER Liste Vide
+    FIN SI
+    
+    coups_legaux ← Liste Vide
+    type_piece ← MINUSCULE(piece)
+    
+    SELON type_piece
+        CAS 'p': coups_legaux ← COUPS_PION(plateau, ligne, colonne, piece)
+        CAS 'r': coups_legaux ← COUPS_TOUR(plateau, ligne, colonne)
+        CAS 'n': coups_legaux ← COUPS_CAVALIER(plateau, ligne, colonne)
+        CAS 'b': coups_legaux ← COUPS_FOU(plateau, ligne, colonne)
+        CAS 'q': coups_legaux ← COUPS_DAME(plateau, ligne, colonne)
+        CAS 'k': coups_legaux ← COUPS_ROI(plateau, ligne, colonne)
+    FIN SELON
+    
+    RETOURNER coups_legaux
+FIN FONCTION

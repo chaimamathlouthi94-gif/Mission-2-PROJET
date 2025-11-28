@@ -1,0 +1,162 @@
+ALGORITHME Compresseur LZW
+
+VARIABLES
+    dictionnaire : Dictionnaire (Chaîne → Entier)
+    dictionnaire_inverse : Dictionnaire (Entier → Chaîne)
+    code_suivant : Entier
+    texte_original : Chaîne
+    donnees_compressees : Liste d'Entiers
+
+DÉBUT
+    // Initialisation
+    INITIALISER_DICTIONNAIRE()
+    
+    AFFICHER "=== COMPRESSEUR LZW ==="
+    AFFICHER "1. Compression"
+    AFFICHER "2. Décompression" 
+    AFFICHER "3. Quitter"
+    
+    SAISIR choix
+    
+    SELON choix
+        CAS 1: PROCEDURE_COMPRESSION()
+        CAS 2: PROCEDURE_DECOMPRESSION()
+        CAS 3: AFFICHER "Au revoir!"
+        AUTRE: AFFICHER "Option invalide!"
+    FIN SELON
+FIN ALGORITHME
+
+FONCTION INITIALISER_DICTIONNAIRE()
+    dictionnaire ← Nouveau Dictionnaire
+    dictionnaire_inverse ← Nouveau Dictionnaire
+    code_suivant ← 0
+    
+    // Ajout des caractères ASCII de base
+    POUR i DE 0 À 255 FAIRE
+        caractere ← CARACTERE(i)
+        dictionnaire[caractere] ← i
+        dictionnaire_inverse[i] ← caractere
+    FIN POUR
+    
+    code_suivant ← 256
+FIN FONCTION
+
+FONCTION COMPRESSER(texte) RETOURNE Liste
+    SI texte = "" ALORS
+        RETOURNER Liste Vide
+    FIN SI
+    
+    INITIALISER_DICTIONNAIRE()
+    resultat ← Liste Vide
+    chaine_courante ← ""
+    
+    AFFICHER "Début compression..."
+    AFFICHER "Texte: ", texte
+    
+    POUR CHAQUE caractere DANS texte FAIRE
+        nouvelle_chaine ← chaine_courante + caractere
+        
+        SI nouvelle_chaine DANS dictionnaire ALORS
+            chaine_courante ← nouvelle_chaine
+        SINON
+            // Ajouter le code actuel au résultat
+            code_actuel ← dictionnaire[chaine_courante]
+            AJOUTER code_actuel À resultat
+            
+            // Ajouter nouvelle entrée au dictionnaire
+            dictionnaire[nouvelle_chaine] ← code_suivant
+            code_suivant ← code_suivant + 1
+            
+            chaine_courante ← caractere
+        FIN SI
+    FIN POUR
+    
+    // Traiter la dernière chaîne
+    SI chaine_courante ≠ "" ALORS
+        code_final ← dictionnaire[chaine_courante]
+        AJOUTER code_final À resultat
+    FIN SI
+    
+    AFFICHER "Compression terminée!"
+    AFFICHER "Codes générés: ", resultat
+    
+    RETOURNER resultat
+FIN FONCTION
+
+FONCTION DECOMPRESSER(donnees_compressees) RETOURNE Chaîne
+    SI donnees_compressees = Liste Vide ALORS
+        RETOURNER ""
+    FIN SI
+    
+    INITIALISER_DICTIONNAIRE()
+    resultat ← ""
+    
+    AFFICHER "Début décompression..."
+    AFFICHER "Données: ", donnees_compressees
+    
+    // Premier code
+    code_precedent ← donnees_compressees[0]
+    resultat ← dictionnaire_inverse[code_precedent]
+    chaine_courante ← resultat
+    
+    // Traiter les codes suivants
+    POUR i DE 1 À LONGUEUR(donnees_compressees)-1 FAIRE
+        code_courant ← donnees_compressees[i]
+        
+        SI code_courant DANS dictionnaire_inverse ALORS
+            entree ← dictionnaire_inverse[code_courant]
+        SINON SI code_courant = code_suivant ALORS
+            // Cas spécial pour la cohérence
+            entree ← chaine_courante + PREMIER_CARACTERE(chaine_courante)
+        SINON
+            ERREUR "Code invalide: " + code_courant
+        FIN SI
+        
+        resultat ← resultat + entree
+        
+        // Mettre à jour le dictionnaire
+        nouvelle_entree ← chaine_courante + PREMIER_CARACTERE(entree)
+        dictionnaire_inverse[code_suivant] ← nouvelle_entree
+        code_suivant ← code_suivant + 1
+        
+        chaine_courante ← entree
+    FIN POUR
+    
+    AFFICHER "Décompression terminée!"
+    AFFICHER "Texte reconstitué: ", resultat
+    
+    RETOURNER resultat
+FIN FONCTION
+
+FONCTION CALCULER_TAUX_COMPRESSION(texte_original, donnees_compressees) RETOURNE Réel
+    SI texte_original = "" ALORS
+        RETOURNER 0
+    FIN SI
+    
+    taille_originale ← LONGUEUR(texte_original)
+    taille_compressee ← LONGUEUR(donnees_compressees)
+    
+    // Estimation de la taille en octets
+    taille_octets_originale ← taille_originale  // ASCII simple
+    taille_octets_compressee ← taille_compressee * 2  // Codes sur 2 octets
+    
+    taux ← (1 - taille_octets_compressee / taille_octets_originale) * 100
+    RETOURNER taux
+FIN FONCTION
+
+PROCEDURE PROCEDURE_COMPRESSION()
+    SAISIR texte_original
+    SI texte_original ≠ "" ALORS
+        donnees_compressees ← COMPRESSER(texte_original)
+        taux ← CALCULER_TAUX_COMPRESSION(texte_original, donnees_compressees)
+        AFFICHER "Taux de compression: ", taux, "%"
+    SINON
+        AFFICHER "Texte vide!"
+    FIN SI
+FIN PROCEDURE
+
+PROCEDURE PROCEDURE_DECOMPRESSION()
+    SAISIR donnees_compressees
+    texte_decompresse ← DECOMPRESSER(donnees_compressees)
+    AFFICHER "Résultat: ", texte_decompresse
+FIN PROCEDURE

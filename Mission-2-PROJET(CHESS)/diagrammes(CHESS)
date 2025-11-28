@@ -1,0 +1,32 @@
+# Diagramme du programme CHESS
+
+text
+[ DÉBUT ]
+
+    INITIALISER_PLATEAU()
+    AFFICHER_PLATEAU()
+
+    AFFICHER "Tour du joueur : X"
+
+    SAISIR commande
+    ANALYSER commande
+
+    [ ? Commande spéciale ? ]
+        ┌─────────── OUI ───────────┐      ┌──── NON ────┐
+        | TRAITER_COMMANDE()         |      |              |
+        | { DÉCOUPER_COUP() }        |      |              |
+        └────────────────────────────┘      |              |
+                                            |              |
+    [ ? Coup valide ? ]                     |              |
+        ┌────────── OUI ──────────┐         |   ┌─ NON ───────────────┐
+        | EXÉCUTER_COUP()          |         |   | AFFICHER "Coup      |
+        |                           |         |   | invalide"           |
+        └───────────────────────────┘         |   └──────────────────────┘
+        CHANGER_JOUEUR()
+
+    [ ? Partie terminée ? ]
+        ┌───────── OUI ─────────┐      ┌───── NON ─────┐
+        | AFFICHER "Fin"         |      |    BOUCLER    |
+        └────────────────────────┘      └───────────────┘
+
+[ FIN ]

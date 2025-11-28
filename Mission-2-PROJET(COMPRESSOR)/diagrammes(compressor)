@@ -1,0 +1,50 @@
+[ DÉBUT ]
+
+    AFFICHER_MENU()
+        • Options 1 à 6
+
+    SAISIR choix
+    ANALYSER choix
+
+    [ ? Choix ? ]
+        ┌─────────── 1 ───────────┐
+        | COMPRESSION_INTERACTIVE()         |
+        | • Saisie texte + compression + analyse |
+        └──────────────────────────────────┘
+
+        ┌─────────── 2 ───────────┐
+        | DÉCOMPRESSION_INTERACTIVE()      |
+        | • Saisie codes + décompression   |
+        └──────────────────────────────────┘
+
+        ┌─────────── 3 ───────────┐
+        | SAUVEGARDE_INTERACTIVE()         |
+        | • Données + fichier JSON          |
+        └──────────────────────────────────┘
+
+        ┌─────────── 4 ───────────┐
+        | CHARGEMENT_INTERACTIVE()         |
+        | • Charger fichier + données       |
+        | • Option décompression            |
+        └──────────────────────────────────┘
+
+        ┌─────────── 5 ───────────┐
+        | DÉMONSTRATION_ALGORITHME()       |
+        | • Exemple complet (LZW)           |
+        └──────────────────────────────────┘
+
+        ┌─────────── 6 ───────────┐
+        | QUITTER()                               |
+        └──────────────────────────────────┘
+
+
+
+    [ ? Continuer ? ]
+        ┌──────────────┐      ┌───────────┐
+        |     OUI      |      |    NON    |
+        └──────────────┘      └───────────┘
+
+        OUI → BOUCLER
+        NON → AU_REVOIR()
+
+[ FIN ]
